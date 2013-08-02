@@ -6,7 +6,7 @@ The goal is to create an UDP tunnel where each packet is transmitted several
 times (4 times in 10ms intervals, for instance), thus increasing the
 probability that the remote end will receive that packet.
 
-This project will consist of a HTTP proxy server, which will run locally on the
-client machine and will forward all data via UDP to a remote server (with a
-better network connection). This remote server will implement the HTTP proxy
+This project will consist of an HTTP proxy server, which will run locally on
+the client machine and will forward all data via UDP to a remote server (with
+a better network connection). This remote server will implement the HTTP proxy
 protocol.
