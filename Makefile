@@ -1,2 +1,7 @@
+CFLAGS+=-std=c99 -Wall
+FILES=tunnel.c ../sev/*.c
+LIBS=-lev
+
 all:
-	$(CC) -std=c99 -Wall udp.c -lev
+	$(CC) $(CFLAGS) -o local local.c $(FILES) $(LIBS)
+	$(CC) $(CFLAGS) -o remote remote.c $(FILES) $(LIBS)
