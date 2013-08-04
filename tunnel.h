@@ -14,7 +14,7 @@ struct tunnel {
     void (*close_cb)(struct tunnel *tunnel);
 };
 
-void tunnel_init(void);
+int tunnel_init(int local_port, const char *remote_address, int remote_port);
 struct tunnel *tunnel_new(void);
 void tunnel_close(struct tunnel *tunnel);
 void tunnel_send_frame(struct tunnel *tunnel, int code, char *data, size_t len);

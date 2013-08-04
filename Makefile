@@ -1,5 +1,5 @@
 CFLAGS+=-std=c99 -Wall
-FILES=tunnel.c ../sev/*.c
+FILES=tunnel.c sev_udp.c ../sev/*.c
 LIBS=-lev
 
 all:

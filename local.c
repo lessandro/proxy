@@ -2,6 +2,10 @@
 #include "../sev/sev.h"
 #include "tunnel.h"
 
+#define LOCAL_PORT 7777
+#define REMOTE_ADDRESS "127.0.0.1"
+#define REMOTE_PORT 7778
+
 #define ADDRESS "127.0.0.1"
 #define PORT 8080
 
@@ -47,16 +51,20 @@ void local_close_cb(struct sev_stream *stream, const char *reason)
 
 int main(int argc, char *argv[])
 {
+    if (tunnel_init(LOCAL_PORT, REMOTE_ADDRESS, REMOTE_PORT) == -1) {
+        perror("tunnel_init");
+        return -1;
+    }
+
+    printf("listening on udp:0.0.0.0:%d\n", LOCAL_PORT);
+
     struct sev_server server;
-
-    tunnel_init();
-
     if (sev_listen(&server, ADDRESS, PORT) == -1) {
         perror("sev_listen");
         return -1;
     }
 
-    printf("listening on %s:%d\n", ADDRESS, PORT);
+    printf("listening on tcp:%s:%d\n", ADDRESS, PORT);
 
     server.open_cb = local_open_cb;
     server.read_cb = local_read_cb;
