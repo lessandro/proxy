@@ -4,9 +4,11 @@
 #include "../sev/sev.h"
 
 struct tunnel {
-    uint32_t id;
-    uint32_t last_sent;
-    uint32_t last_received;
+    int alive;
+    uint8_t id;
+    int32_t last_sent;
+    int32_t last_received;
+    int32_t last_ackd;
 
     void *data;
 
@@ -15,9 +17,9 @@ struct tunnel {
 };
 
 int tunnel_init(int local_port, const char *remote_address, int remote_port);
+void tunnel_reset(struct tunnel *tunnel, uint8_t id);
 struct tunnel *tunnel_new(void);
 void tunnel_close(struct tunnel *tunnel);
-void tunnel_send_frame(struct tunnel *tunnel, int code, char *data, size_t len);
 void tunnel_send(struct tunnel *tunnel, char *data, size_t len);
 
 #endif

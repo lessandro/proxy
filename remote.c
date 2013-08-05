@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "../sev/sev.h"
 #include "tunnel.h"
 
@@ -6,19 +7,24 @@
 #define REMOTE_ADDRESS "127.0.0.1"
 #define REMOTE_PORT 7777
 
-void tunnel_open_cb()
+
+void tunnel_open_cb(struct tunnel *tunnel)
 {
     // create new tunnel
 }
 
-void tunnel_read_cb()
+void tunnel_read_cb(struct tunnel *tunnel, char *data, size_t len)
 {
     // implement the http proxy protocol
+    data[len] = '\0';
+    printf("received: %s", data);
+
+    tunnel_send(tunnel, data, strlen(data));
 }
 
-void tunnel_close_cb()
+void tunnel_close_cb(struct tunnel *tunnel)
 {
-    // close stream
+    // implement the http proxy protocol
 }
 
 int main(int argc, char *argv[])

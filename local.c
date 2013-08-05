@@ -9,6 +9,11 @@
 #define ADDRESS "127.0.0.1"
 #define PORT 8080
 
+void tunnel_open_cb(struct tunnel *tunnel)
+{
+    // never called
+}
+
 void tunnel_read_cb(struct tunnel *tunnel, char *data, size_t len)
 {
     sev_send(tunnel->data, data, len);
