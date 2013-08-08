@@ -1,14 +1,29 @@
 #ifndef TUNNEL_H
 #define TUNNEL_H
 
-#include "../sev/sev.h"
+#include <stdlib.h>
+#include <stdint.h>
+#include <ev.h>
+
+#define TUNNEL_OPEN 0
+#define TUNNEL_DATA 1
+#define TUNNEL_CLOSE 2
+
+#define TUNNEL_CLOSED 0
+#define TUNNEL_ACTIVE 1
+#define TUNNEL_CLOSING 2
+
+struct __attribute__((__packed__)) frame_header {
+    uint8_t id;
+    uint8_t code;
+};
+
+#define HEADER_SIZE sizeof(struct frame_header)
+#define PAYLOAD_SIZE 1300
 
 struct tunnel {
-    int alive;
     uint8_t id;
-    int32_t last_sent;
-    int32_t last_received;
-    int32_t last_ackd;
+    int state;
 
     void *data;
 
@@ -16,8 +31,6 @@ struct tunnel {
     void (*close_cb)(struct tunnel *tunnel);
 };
 
-int tunnel_init(int local_port, const char *remote_address, int remote_port);
-void tunnel_reset(struct tunnel *tunnel, uint8_t id);
 struct tunnel *tunnel_new(void);
 void tunnel_close(struct tunnel *tunnel);
 void tunnel_send(struct tunnel *tunnel, char *data, size_t len);

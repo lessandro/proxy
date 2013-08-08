@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "../sev/sev.h"
 #include "tunnel.h"
+#include "faketcp.h"
 
 #define LOCAL_PORT 7777
 #define REMOTE_ADDRESS "127.0.0.1"
@@ -56,7 +57,7 @@ void local_close_cb(struct sev_stream *stream, const char *reason)
 
 int main(int argc, char *argv[])
 {
-    if (tunnel_init(LOCAL_PORT, REMOTE_ADDRESS, REMOTE_PORT) == -1) {
+    if (faketcp_init(LOCAL_PORT, REMOTE_ADDRESS, REMOTE_PORT) == -1) {
         perror("tunnel_init");
         return -1;
     }
