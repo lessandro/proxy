@@ -17,12 +17,12 @@ void tunnel_open_cb(struct tunnel *tunnel)
 
 void tunnel_read_cb(struct tunnel *tunnel, char *data, size_t len)
 {
-    sev_send(tunnel->data, data, len);
+    sev_send(tunnel->stream, data, len);
 }
 
 void tunnel_close_cb(struct tunnel *tunnel)
 {
-    sev_close(tunnel->data, "remote_close");
+    sev_close(tunnel->stream, "remote_close");
 }
 
 void local_open_cb(struct sev_stream *stream)
@@ -33,7 +33,7 @@ void local_open_cb(struct sev_stream *stream)
 
     struct tunnel *tunnel = tunnel_new();
 
-    tunnel->data = stream;
+    tunnel->stream = stream;
     tunnel->read_cb = tunnel_read_cb;
     tunnel->close_cb = tunnel_close_cb;
 

@@ -11,6 +11,8 @@ struct packet {
     int len;
 };
 
+#define BLOCK_LIMIT 1000
+#define ALLOW_LIMIT 500
 #define MAX_PACKETS 8192
 
 static struct packet sent[MAX_PACKETS];
@@ -18,6 +20,8 @@ static struct packet received[MAX_PACKETS];
 
 static int64_t next_seq;
 static int64_t expect_seq;
+static int64_t unackd_seq;
+static int blocked;
 
 static struct sev_udp *udp;
 static struct sev_addr remote_addr;
@@ -61,6 +65,13 @@ void faketcp_send(char *data, size_t len)
     memcpy(packet->data + sizeof(int64_t), data, len);
 
     retransmit(packet);
+
+    if (!blocked && (next_seq - unackd_seq) > BLOCK_LIMIT) {
+        printf("%lld - %lld > %d, blocking reads\n",
+            next_seq, unackd_seq, BLOCK_LIMIT);
+        blocked = 1;
+        faketcp_block_reads();
+    }
 }
 
 static void handle_ack(int64_t seq)
@@ -76,6 +87,20 @@ static void handle_ack(int64_t seq)
     ev_timer_stop(EV_DEFAULT_ &packet->timer);
     packet->state = 0;
     free(packet->data);
+
+    if (seq == unackd_seq) {
+        // find next unackd seq
+        for (; unackd_seq < next_seq; unackd_seq++)
+            if (sent[unackd_seq % MAX_PACKETS].state > 0)
+                break;
+
+        if (blocked && (next_seq - unackd_seq) < ALLOW_LIMIT) {
+            printf("%lld - %lld < %d, allowing reads\n",
+                next_seq, unackd_seq, ALLOW_LIMIT);
+            blocked = 0;
+            faketcp_allow_reads();
+        }
+    }
 }
 
 static void send_ack(int64_t seq)
@@ -147,8 +172,11 @@ int faketcp_init(int local_port, const char *remote_address, int remote_port)
 
     memset(sent, 0, sizeof(sent));
     memset(received, 0, sizeof(received));
+
     next_seq = 1;
     expect_seq = 1;
+    unackd_seq = 1;
+    blocked = 0;
 
     return 0;
 }

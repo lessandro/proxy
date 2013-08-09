@@ -9,8 +9,24 @@ extern void tunnel_close_cb(struct tunnel *tunnel);
 
 #define NUM_TUNNELS 256
 
-static struct tunnel tunnels[NUM_TUNNELS];
+static struct tunnel tunnels[NUM_TUNNELS] = {};
 static uint8_t next_id = 0;
+
+void faketcp_block_reads(void)
+{
+    for (int i=0; i<NUM_TUNNELS; i++) {
+        if (tunnels[i].state == TUNNEL_ACTIVE && tunnels[i].stream)
+            sev_block_read(tunnels[i].stream);
+    }
+}
+
+void faketcp_allow_reads(void)
+{
+    for (int i=0; i<NUM_TUNNELS; i++) {
+        if (tunnels[i].state == TUNNEL_ACTIVE && tunnels[i].stream)
+            sev_allow_read(tunnels[i].stream);
+    }
+}
 
 static int send_frame(struct tunnel *tunnel, int code, char *data, size_t len)
 {
@@ -34,25 +50,28 @@ static void tunnel_reset(struct tunnel *tunnel, uint8_t id)
     memset(tunnel, 0, sizeof(struct tunnel));
     tunnel->id = id;
     tunnel->state = TUNNEL_CLOSED;
+    tunnel->stream = NULL;
 }
 
 void faketcp_recv(char *data, size_t len)
 {
     struct frame_header *header = (struct frame_header *)data;
 
-    printf("tunnel recv id %d code %d len %zu\n", header->id, header->code, len);
+    printf("tunnel recv id %d code %d len %zu\n",
+        header->id, header->code, len);
 
     struct tunnel *tunnel = &tunnels[header->id];
 
-    if (header->code == TUNNEL_OPEN) {
+    if (header->code == TUNNEL_OPEN && tunnel->state == TUNNEL_CLOSED) {
         tunnel_reset(tunnel, header->id);
+        tunnel->state = TUNNEL_ACTIVE;
         tunnel_open_cb(tunnel);
     }
 
-    if (header->code == TUNNEL_DATA)
+    if (header->code == TUNNEL_DATA && tunnel->state == TUNNEL_ACTIVE)
         tunnel_read_cb(tunnel, data + HEADER_SIZE, len - HEADER_SIZE);
 
-    if (header->code == TUNNEL_CLOSE)
+    if (header->code == TUNNEL_CLOSE && tunnel->state == TUNNEL_ACTIVE)
         tunnel_close_cb(tunnel);
 }
 
@@ -73,7 +92,8 @@ struct tunnel *tunnel_new(void)
 void tunnel_close(struct tunnel *tunnel)
 {
     send_frame(tunnel, TUNNEL_CLOSE, NULL, 0);
-    tunnel->state = TUNNEL_CLOSING;
+    tunnel->state = TUNNEL_CLOSED;
+    tunnel->stream = NULL;
 }
 
 void tunnel_send(struct tunnel *tunnel, char *data, size_t len)
