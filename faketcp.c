@@ -64,7 +64,9 @@ static void retransmit(struct packet *packet)
 
     sev_udp_sendto(udp, packet->data, packet->len, &remote_addr);
 
-    double delay = (1 << (packet->state++ - 1)) * 0.1;
+    // 0, 10, 20, 300, 310, 320, 600, 610, 620, ...
+    double delay = (packet->state++ % 3) == 0 ? 0.3 : 0.01;
+    printf("delay %f\n", delay);
 
     ev_timer_init(&packet->timer, timer_cb, delay, 0);
     packet->timer.data = packet;
