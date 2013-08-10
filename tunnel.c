@@ -123,5 +123,11 @@ void tunnel_close(struct tunnel *tunnel)
 
 void tunnel_send(struct tunnel *tunnel, char *data, size_t len)
 {
-    send_frame(tunnel, TUNNEL_DATA, data, len);
+    while (len > 0) {
+        size_t num = len > PAYLOAD_SIZE ? PAYLOAD_SIZE : len;
+        send_frame(tunnel, TUNNEL_DATA, data, num);
+
+        data += num;
+        len -= num;
+    }
 }
