@@ -1,4 +1,4 @@
-CFLAGS+=-std=c99 -Wall
+CFLAGS+=-std=gnu99 -Wall
 FILES=tunnel.c faketcp.c ./sev/*.c
 LIBS=-lev
 
