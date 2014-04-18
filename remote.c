@@ -25,14 +25,13 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "../sev/sev.h"
+#include "sev/sev.h"
 #include "tunnel.h"
 #include "faketcp.h"
 
 #define LOCAL_PORT 7778
 #define REMOTE_ADDRESS "127.0.0.1"
 #define REMOTE_PORT 7777
-
 
 void tunnel_open_cb(struct tunnel *tunnel)
 {

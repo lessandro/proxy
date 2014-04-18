@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <ev.h>
-#include "../sev/sev.h"
+#include "sev/sev.h"
 
 #define TUNNEL_OPEN 0
 #define TUNNEL_DATA 1

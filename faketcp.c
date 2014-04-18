@@ -79,7 +79,7 @@ void faketcp_send(char *data, size_t len)
     struct packet *packet = &sent[next_seq % MAX_PACKETS];
 
     if (packet->state != 0) {
-        printf("packet->stage != 0\n");
+        printf("packet->state != 0\n");
         return;
     }
 
@@ -93,6 +93,7 @@ void faketcp_send(char *data, size_t len)
 
     retransmit(packet);
 
+    // allowed to send up to BLOCK_LIMIT packets without an ack
     if (!blocked && (next_seq - unackd_seq) > BLOCK_LIMIT) {
         printf("%lld - %lld > %d, blocking reads\n",
             next_seq, unackd_seq, BLOCK_LIMIT);

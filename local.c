@@ -24,7 +24,7 @@
  */
 
 #include <stdio.h>
-#include "../sev/sev.h"
+#include "sev/sev.h"
 #include "tunnel.h"
 #include "faketcp.h"
 
